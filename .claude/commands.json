@@ -1,0 +1,29 @@
+{
+  "commands": [
+    {
+      "name": "adr",
+      "description": "Create a new Architecture Decision Record",
+      "prompt": "Create a new ADR (Architecture Decision Record) following the template in docs/adr/adr-000-template.md. Ask me for:\n1. The decision title\n2. The context/problem\n3. The decision made\n4. Considered alternatives\n\nThen create the ADR file with the next sequential number, update docs/adr/README.md, and reference it in docs/arc42/09_architecture_decisions.md if appropriate."
+    },
+    {
+      "name": "doc",
+      "description": "Update Arc42 documentation section",
+      "prompt": "Help me update the Arc42 documentation. Ask which section I want to update (1-12), then guide me through updating the relevant markdown file in docs/arc42/. Follow the Arc42 template structure and maintain consistency with existing documentation."
+    },
+    {
+      "name": "arch-review",
+      "description": "Review current architecture decisions",
+      "prompt": "Review the current architecture and documentation:\n1. Read all ADRs in docs/adr/\n2. Check Arc42 sections 1-4 for completeness\n3. Identify missing or outdated documentation\n4. Suggest next steps for architecture refinement\n\nProvide a summary of findings and recommendations."
+    },
+    {
+      "name": "service-scaffold",
+      "description": "Scaffold a new microservice",
+      "prompt": "Help me scaffold a new microservice following PaperlessCore conventions:\n1. Ask for service name (must start with PLC.)\n2. Ask for service type (Node.js function or C# service)\n3. Create appropriate directory structure\n4. Add basic configuration files\n5. Update documentation\n\nFollow KISS principles and Clean Architecture patterns."
+    },
+    {
+      "name": "todo-review",
+      "description": "Review project TODOs and next steps",
+      "prompt": "Review the project status:\n1. Check README.md for documented next steps\n2. Review Arc42 sections marked as TBD\n3. Check for incomplete ADRs\n4. Suggest prioritized next steps\n\nProvide a concise summary of what should be tackled next."
+    }
+  ]
+}

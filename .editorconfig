@@ -1,0 +1,70 @@
+# PaperlessCore EditorConfig
+# https://editorconfig.org
+
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# C# files
+[*.cs]
+indent_size = 4
+
+# JavaScript/TypeScript
+[*.{js,ts}]
+indent_size = 2
+
+# Svelte
+[*.svelte]
+indent_size = 2
+
+# JSON
+[*.json]
+indent_size = 2
+
+# YAML
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+
+# Terraform
+[*.tf]
+indent_size = 2
+
+# Shell scripts
+[*.sh]
+indent_size = 2
+
+# Makefiles
+[Makefile]
+indent_style = tab
+
+# C# specific settings
+[*.cs]
+# Organize usings
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# Code style
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# Indentation
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = flush_left
+
+# Spacing
+csharp_space_after_cast = false
+csharp_space_after_keywords_in_control_flow_statements = true

@@ -1,0 +1,55 @@
+# PaperlessCore .gitattributes
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.cs text diff=csharp
+*.js text
+*.ts text
+*.json text
+*.xml text
+*.yml text
+*.yaml text
+
+# Svelte
+*.svelte text
+
+# Documentation
+*.md text
+*.txt text
+*.adoc text
+
+# Scripts
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Configuration
+*.config text
+*.conf text
+.editorconfig text
+.gitignore text
+.gitattributes text
+
+# Terraform
+*.tf text
+*.tfvars text
+
+# Docker
+Dockerfile text
+*.dockerignore text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.dll binary
+*.exe binary
+*.so binary
+*.dylib binary
