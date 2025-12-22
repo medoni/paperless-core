@@ -159,6 +159,37 @@ Du arbeitest am **PaperlessCore (PLC)** Projekt - einer Cloud-native Dokumentenv
 - Keine veralteten Informationen
 - Bei Änderungen: Sofort dokumentieren
 
+### Stil-Richtlinien für Dokumentation
+
+**Zielgruppe: Entwickler, nicht Marketing**
+
+- Sachlich und präzise schreiben
+- Kein KI-Bullshit oder Marketing-Sprech
+- Sinnlose Phrasen weglassen
+
+**Zahlen und Schätzungen:**
+- Grobe, sinnvolle Rundungen verwenden
+- Beispiel: 3.500 PDFs statt 3.195 PDFs
+- Beispiel: ~10 EUR/Monat statt 9,73 EUR/Monat
+
+**Emojis und Formatierung:**
+- Emojis nur sparsam und gezielt einsetzen
+- ✅ nur bei besonderen Highlights im Fließtext
+- NICHT bei jeder Zeile in Listen
+- Wenn Überschrift "Positiv" heißt, braucht es kein ✅ vor jedem Punkt
+- Bold (**fett**) nur für wirklich wesentliche Begriffe
+- Nicht jeden zweiten Begriff fett machen
+
+**Listen:**
+- Klare, knappe Bullet Points
+- Keine redundanten Marker (Überschrift reicht)
+- Pro/Con-Listen ohne Emojis vor jedem Item
+
+**Konsequenzen in ADRs:**
+- Positiv/Negativ/Risiken klar trennen
+- Sachlich auflisten, keine Verkaufsrhetorik
+- Mitigation konkret benennen
+
 ## Security & Best Practices
 
 ### OWASP Top 10 beachten

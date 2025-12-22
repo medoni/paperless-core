@@ -1,0 +1,398 @@
+# PaperlessCore - Standard Document Structure Template
+# Version: 1.0.0
+#
+# This template defines:
+# - Document categories and subcategories
+# - Processing rules (OCR, extraction, retention)
+# - Person assignment rules
+# - Tagging strategy
+
+metadata:
+  version: "1.0.0"
+  name: "Standard Household (Germany)"
+  description: "Standard document structure for German households"
+  locale: "de-DE"
+
+# Person assignment modes
+assignmentModes:
+  none: "No person assignment (shared/family documents)"
+  single: "Single person assignment required"
+  multiple: "Multiple persons allowed"
+  optional: "Person assignment optional"
+
+# Document categories with processing rules
+categories:
+
+  # 1. Arbeit & Einkommen
+  - id: work-income
+    name: "Arbeit & Einkommen"
+    nameEn: "Work & Income"
+    assignmentMode: single  # Always person-specific
+    subcategories:
+      - id: employment-contract
+        name: "Arbeitsverträge"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false  # Manual review recommended
+        retentionYears: 10
+        requiredTags: ["year"]
+
+      - id: salary-statement
+        name: "Gehaltsbescheinigungen"
+        ocrEnabled: false  # Classification only in V1
+        fullTextSearch: false
+        dataExtraction: false
+        retentionYears: 10
+        requiredTags: ["year", "month"]
+
+      - id: pension-insurance
+        name: "Rentenversicherung"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 50  # Lifetime
+        requiredTags: ["year"]
+
+      - id: social-insurance
+        name: "Sozialversicherung"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 10
+        requiredTags: ["year"]
+
+      - id: unemployment-office
+        name: "Arbeitsamt"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 10
+        requiredTags: ["year"]
+
+      - id: self-employment
+        name: "Selbstständigkeit"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 10
+        requiredTags: ["year"]
+
+  # 2. Steuern & Finanzamt
+  - id: taxes
+    name: "Steuern & Finanzamt"
+    nameEn: "Taxes"
+    assignmentMode: optional  # Can be joint or individual
+    subcategories:
+      - id: tax-return
+        name: "Steuererklärungen"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 10
+        requiredTags: ["year", "tax-year"]
+
+      - id: tax-assessment
+        name: "Steuerbescheide"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true  # Amount, tax number, etc.
+        retentionYears: 10
+        requiredTags: ["year", "tax-year"]
+
+      - id: tax-receipts
+        name: "Belege"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true  # Receipts need detailed extraction
+        retentionYears: 10
+        requiredTags: ["year", "category"]
+
+  # 3. Wohnen & Immobilien
+  - id: housing-property
+    name: "Wohnen & Immobilien"
+    nameEn: "Housing & Real Estate"
+    assignmentMode: none  # Family/shared
+    subcategories:
+      - id: property-ownership
+        name: "Eigentum"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 50  # Permanent
+        requiredTags: ["year", "property-id"]
+
+      - id: rental
+        name: "Miete"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 10
+        requiredTags: ["year"]
+
+      - id: utilities
+        name: "Nebenkosten"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 3
+        requiredTags: ["year", "utility-type"]
+
+      - id: renovations
+        name: "Renovierungen & Baumaßnahmen"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 10
+        requiredTags: ["year", "project-name"]
+
+  # 4. Versicherungen
+  - id: insurance
+    name: "Versicherungen"
+    nameEn: "Insurance"
+    assignmentMode: multiple  # Depends on insurance type
+    subcategories:
+      - id: health-insurance
+        name: "Krankenversicherung"
+        assignmentMode: single  # Person-specific override
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 10
+        requiredTags: ["year"]
+
+      - id: liability-insurance
+        name: "Haftpflicht"
+        assignmentMode: optional
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 10
+        requiredTags: ["year", "policy-number"]
+
+      - id: household-insurance
+        name: "Hausrat"
+        assignmentMode: none  # Family
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 10
+        requiredTags: ["year", "policy-number"]
+
+      - id: life-insurance
+        name: "Lebensversicherung"
+        assignmentMode: single
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 50
+        requiredTags: ["year", "policy-number"]
+
+      - id: other-insurance
+        name: "Sonstige Versicherungen"
+        assignmentMode: optional
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 10
+        requiredTags: ["year", "insurance-type"]
+
+  # 5. Besitz & Vermögen
+  - id: assets
+    name: "Besitz & Vermögen"
+    nameEn: "Assets & Property"
+    assignmentMode: optional  # Can be individual or shared
+    subcategories:
+      - id: vehicles
+        name: "Fahrzeuge"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 10
+        requiredTags: ["year", "vehicle-id"]
+
+      - id: contracts
+        name: "Kaufverträge"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 10
+        requiredTags: ["year", "asset-type"]
+
+      - id: financing
+        name: "Finanzierungen"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 10
+        requiredTags: ["year", "financing-type"]
+
+  # 6. Alltag & Konsum
+  - id: everyday-consumption
+    name: "Alltag & Konsum"
+    nameEn: "Everyday & Consumption"
+    assignmentMode: optional
+    subcategories:
+      - id: receipts
+        name: "Kassenbons & Quittungen"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true  # FOCUS: Start with this!
+        extractionFields:
+          - date
+          - merchant
+          - totalAmount
+          - vatRates
+          - paymentMethod
+          - lineItems  # optional, detailed
+        retentionYears: 2
+        requiredTags: ["year", "month"]
+
+      - id: invoices
+        name: "Rechnungen"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        extractionFields:
+          - invoiceNumber
+          - date
+          - vendor
+          - totalAmount
+          - vatAmount
+          - dueDate
+        retentionYears: 10
+        requiredTags: ["year", "vendor"]
+
+      - id: warranties
+        name: "Garantiebelege"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: true
+        retentionYears: 5
+        requiredTags: ["year", "product"]
+
+  # 7. Behörden & Anträge
+  - id: authorities
+    name: "Behörden & Anträge"
+    nameEn: "Authorities & Applications"
+    assignmentMode: optional
+    subcategories:
+      - id: children
+        name: "Kinder"
+        assignmentMode: single  # Child-specific
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 20
+        requiredTags: ["year", "child-name", "authority"]
+
+      - id: other-authorities
+        name: "Sonstige Behörden"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 10
+        requiredTags: ["year", "authority"]
+
+  # 8. Gesundheit
+  - id: health
+    name: "Gesundheit"
+    nameEn: "Health"
+    assignmentMode: single  # Always person-specific
+    subcategories:
+      - id: medical-reports
+        name: "Arztberichte"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 10
+        requiredTags: ["year"]
+
+      - id: prescriptions
+        name: "Rezepte"
+        ocrEnabled: false
+        fullTextSearch: false
+        dataExtraction: false
+        retentionYears: 1
+        requiredTags: ["year"]
+
+      - id: treatments
+        name: "Behandlungen"
+        ocrEnabled: true
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 10
+        requiredTags: ["year"]
+
+  # 9. Sonstiges
+  - id: miscellaneous
+    name: "Sonstiges"
+    nameEn: "Miscellaneous"
+    assignmentMode: optional  # Can be personal or shared
+    subcategories:
+      - id: volunteer-work
+        name: "Ehrenamt"
+        assignmentMode: single
+        ocrEnabled: false
+        fullTextSearch: true
+        dataExtraction: false
+        retentionYears: 5
+        requiredTags: ["year", "organization"]
+
+      - id: hobbies
+        name: "Freizeit & Hobbys"
+        assignmentMode: optional
+        ocrEnabled: false
+        fullTextSearch: false
+        dataExtraction: false
+        retentionYears: 3
+        requiredTags: ["year", "hobby"]
+
+# Standard tags that can be applied to any document
+standardTags:
+  temporal:
+    - year        # Required for all documents
+    - month       # Optional, recommended for receipts
+    - quarter     # Optional, for quarterly reports
+
+  person:
+    - person-name # Flexible, can be "Familie", "Micha", "Anika", etc.
+
+  priority:
+    - important   # Critical documents (contracts, deeds)
+    - routine     # Regular documents
+    - archival    # Long-term storage
+
+  status:
+    - pending     # Awaiting action
+    - processed   # Completed
+    - archived    # Long-term storage
+
+# Processing pipeline defaults
+processingDefaults:
+  upload:
+    allowedFormats: ["pdf", "jpg", "jpeg", "png"]
+    maxFileSizeMB: 50
+    maxBatchSize: 100
+
+  ocr:
+    provider: "google-document-ai"  # or "aws-textract"
+    language: "de"
+    async: true
+    queuePriority: "normal"
+
+  classification:
+    method: "ml-assisted"  # ml-assisted, manual, rule-based
+    confidenceThreshold: 0.85
+    manualReviewOnLowConfidence: true
+
+  extraction:
+    async: true
+    queuePriority: "normal"
+    retryAttempts: 3
+
+# Cost optimization
+costOptimization:
+  ocrBatchProcessing: true        # Process in batches during off-peak
+  preferredProcessingHours: "22:00-06:00"  # Night hours
+  cacheOcrResults: true
+  compressionEnabled: true
