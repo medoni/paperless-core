@@ -97,7 +97,7 @@ Wichtige Architekturentscheidungen werden als ADRs (Architecture Decision Record
 
 ## Lizenz
 
-> TBD
+MIT Siehe [LICENSE](LICENSE)
 
 ## Kontakt
 
