@@ -1,0 +1,35 @@
+PaperlessCore - Deployment Info
+Environment: dev
+Generated: 2025-12-23T06:33:29Z
+
+================================================================================
+DEPLOYED SERVICES
+================================================================================
+
+PLC Frontend (Cloud Run)
+URL:    https://plc-frontend-bx7xdsbeoa-ew.a.run.app
+Status: Public (unauthenticated access enabled)
+Image:  europe-west1-docker.pkg.dev/paperless-core-dev/plc-frontend-repo/plc-frontend:latest
+
+PLC API (Cloud Run)
+URL:    https://plc-api-bx7xdsbeoa-ew.a.run.app
+Status: Public (unauthenticated access enabled)
+Image:  europe-west1-docker.pkg.dev/paperless-core-dev/plc-api-repo/plc-api:latest
+
+Endpoints:
+  - Health:  https://plc-api-bx7xdsbeoa-ew.a.run.app/health
+  - Version: https://plc-api-bx7xdsbeoa-ew.a.run.app/api/version
+
+================================================================================
+INFRASTRUCTURE
+================================================================================
+
+Project:        paperless-core-dev
+Region:         europe-west1
+
+Storage Bucket: paperless-core-dev-documents
+Bucket URL:     gs://paperless-core-dev-documents
+
+Service Account: plc-app-dev@paperless-core-dev.iam.gserviceaccount.com
+
+================================================================================
