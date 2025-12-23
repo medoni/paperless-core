@@ -14,6 +14,7 @@ Wir verwenden das [MADR Template](https://adr.github.io/madr/) (Markdown Any Dec
 | [ADR-001](adr-001-document-categorization-strategy.md) | Document Categorization Strategy | Accepted | 2025-12-22 |
 | [ADR-002](adr-002-upload-processing-pipeline.md) | Upload and Processing Pipeline | Accepted | 2025-12-22 |
 | [ADR-003](adr-003-ocr-strategy.md) | OCR Strategy (Async, Type-Dependent) | Accepted | 2025-12-22 |
+| [ADR-004](adr-004-opentofu-vs-terraform.md) | OpenTofu vs Terraform for IaC | Accepted | 2025-12-22 |
 
 ## Neue ADR erstellen
 

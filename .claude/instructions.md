@@ -50,7 +50,7 @@ Du arbeitest am **PaperlessCore (PLC)** Projekt - einer Cloud-native Dokumentenv
 - **Primär**: Google Cloud Platform
 - **Sekundär**: AWS
 - **Optional**: K3s (self-hosted)
-- **IaC**: Terraform
+- **IaC**: OpenTofu (Terraform alternative)
 - **Observability**: OpenTelemetry (OTEL)
 
 ### Datenbank
@@ -79,16 +79,20 @@ Du arbeitest am **PaperlessCore (PLC)** Projekt - einer Cloud-native Dokumentenv
 ```
 /src
   /backend          - C# Core Domain
+  /infrastructure   - Infrastructure as Code (OpenTofu)
+    /gcp
+      /envs/dev     - Development environment
+      /modules      - Reusable modules
+    /aws
+      /envs/dev
+      /modules
   /services         - Microservices/Nano-Services
   /functions        - Serverless Functions (Node.js)
   /frontend         - Svelte Web App
+  /config           - Configuration files (YAML)
 /docs
   /arc42           - Architekturdokumentation
   /adr             - Architecture Decision Records
-/infrastructure
-  /<cloud-provider>
-    /envs/default
-    /modules
 ```
 
 ## Entwicklungs-Workflow
@@ -109,6 +113,24 @@ Du arbeitest am **PaperlessCore (PLC)** Projekt - einer Cloud-native Dokumentenv
 - ADR erstellen falls nötig
 - Arc42 Abschnitte aktualisieren
 - TODOs für offene Punkte dokumentieren
+
+### 4. Infrastructure as Code (OpenTofu) Testing
+- **IMMER** `tofu plan` ausführen nach IaC-Änderungen
+- Fehler beheben bevor du dem User antwortest
+- Command: `cd src/infrastructure/gcp/envs/dev && tofu plan`
+- Bei Fehlern: Konfiguration anpassen und erneut testen
+- Erst wenn `tofu plan` erfolgreich: User informieren
+
+### 5. OpenTofu/Terraform Dateistruktur
+- **Konsistente Benennung mit `_`-Präfix für organisatorische Dateien**
+- Jedes Modul/Environment sollte folgende Dateien haben:
+  - `_.provider.tf` - Provider-Konfiguration
+  - `_.variables.tf` - Input-Variablen
+  - `_.outputs.tf` - Output-Werte
+  - `_.data.tf` - Data Sources
+  - `_.locals.tf` - Lokale Variablen
+- Fachliche Ressourcen in separaten Dateien (z.B. `iam.tf`, `storage.tf`, `cicd.tf`)
+- Diese Struktur für alle Environments und Module verwenden
 
 ## Code-Style
 
@@ -189,6 +211,12 @@ Du arbeitest am **PaperlessCore (PLC)** Projekt - einer Cloud-native Dokumentenv
 - Positiv/Negativ/Risiken klar trennen
 - Sachlich auflisten, keine Verkaufsrhetorik
 - Mitigation konkret benennen
+
+**Dokumentationslänge:**
+- README-Dateien: Fokussiert und praktisch
+- "Next Steps" Sektionen vermeiden (außer in Getting Started Guide)
+- ADRs: Alternativen-Sektion ist optional, weglassen wenn nicht relevant
+- Auf das Wesentliche konzentrieren
 
 ## Security & Best Practices
 

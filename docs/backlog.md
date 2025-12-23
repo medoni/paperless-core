@@ -1,12 +1,21 @@
 # PaperlessCore - Backlog & Offene Punkte
 
-Dieses Dokument sammelt offene Anforderungen, Wünsche und zu klärende Punkte.
+> **POC-Phase:** Temporäres Backlog bis POC auf GCloud fertig ist.
+> **Nach POC:** Migration zu GitHub Issues + Project Board
+
+## Status-Legende
+- ⏳ **To Do** - Noch nicht begonnen
+- 🔄 **In Progress** - Wird gerade bearbeitet
+- ✅ **Done** - Erledigt
+- 🚫 **Won't Do (POC)** - Verschoben auf Post-POC
+
+---
 
 ## Hochpriorität (V1)
 
 ### 1. API-First Approach
 
-**Status:** Offen
+**Status:** ⏳ To Do
 
 **Anforderung:**
 - API-Spec gemeinsam mit Frontend und Backend definieren (OpenAPI/Swagger)
@@ -28,7 +37,7 @@ Dieses Dokument sammelt offene Anforderungen, Wünsche und zu klärende Punkte.
 
 ### 2. Authentication & Authorization
 
-**Status:** Offen, V2 geplant
+**Status:** 🚫 Won't Do (POC)
 
 **Anforderungen:**
 - Google Sign-In (GCP)
@@ -52,7 +61,7 @@ Dieses Dokument sammelt offene Anforderungen, Wünsche und zu klärende Punkte.
 
 ### 3. Domain für Testumgebung
 
-**Status:** Offen, warte auf Eingabe
+**Status:** ⏳ To Do
 
 **Anforderung:**
 - Dedizierte Domain für Test/Dev/Staging
@@ -71,7 +80,7 @@ Dieses Dokument sammelt offene Anforderungen, Wünsche und zu klärende Punkte.
 
 ### 4. Dateinamen & Deep Links
 
-**Status:** Offen
+**Status:** ⏳ To Do
 
 **Anforderungen:**
 - Frontend: Lesbare IDs/Slugs (z.B. `rewe-kassenbon-2025-12-22`)
@@ -104,11 +113,75 @@ subcategories:
 
 ---
 
+### 5. Code & Repository Cleanup
+
+**Status:** ✅ Done
+
+**Anforderungen:**
+- Infrastruktur-Code unter `src/` organisieren
+- Veraltete Verzeichnisstrukturen entfernen
+- Konsistente Projektstruktur sicherstellen
+
+**Entscheidung:**
+- `/infrastructure` → `/src/infrastructure` verschoben
+- `infrastructure/gcp/envs/default` entfernt (verwende `dev` statt `default`)
+- Alle Dokumentations-Referenzen aktualisiert
+- Bootstrap-Script angepasst für neue Pfade
+
+**Begründung:**
+- Alle Quellcode-Artefakte unter `src/` vereinheitlicht
+- Klarere Trennung zwischen Docs und Source
+- Environment-Namen explizit (dev, prod) statt generisch (default)
+
+---
+
+### 6. DateTime Handling Strategy
+
+**Status:** ✅ Done
+
+**Anforderungen:**
+- Konsistente Zeitstempel-Behandlung
+- Timezone-Awareness
+- API-Kompatibilität
+
+**Entscheidung:**
+- **User-facing**: `DateTimeOffset` für alle User-Requests (API, Frontend, Datenbank)
+  - Beispiel: Document Upload Timestamp, User Created At
+  - Preserves timezone information
+- **Server-internal**: `DateTimeOffset.Utc` für Server-Operationen (Jobs, Scheduler, Logs)
+  - Beispiel: Background Job Execution, System Events
+  - Always UTC for consistency
+
+**Implementierung:**
+```csharp
+// User-facing API
+public class Document
+{
+    public DateTimeOffset UploadedAt { get; set; }  // Preserves user timezone
+    public DateTimeOffset LastModified { get; set; }
+}
+
+// Server-internal
+public class BackgroundJob
+{
+    public DateTimeOffset ExecutedAt => DateTimeOffset.UtcNow;  // Always UTC
+}
+```
+
+**Begründung:**
+- `DateTimeOffset` über `DateTime` (timezone-aware)
+- User-Daten mit Timezone-Info für korrekte Anzeige
+- Server-Logs immer UTC für Consistency
+- Keine Timezone-Conversion-Bugs
+
+---
+
+
 ## Mittlere Priorität (V1 oder V2)
 
 ### 5. CI/CD Pipeline
 
-**Status:** Offen
+**Status:** 🚫 Won't Do (POC)
 
 **Anforderungen:**
 - Automated Tests
@@ -134,7 +207,7 @@ subcategories:
 
 ### 6. Test-Pyramide & Coverage
 
-**Status:** Offen
+**Status:** 🚫 Won't Do (POC)
 
 **Anforderungen:**
 - Test-Strategie definieren
@@ -154,12 +227,13 @@ subcategories:
 
 **Test-Pyramide:**
 ```
-        /\
-       /E2E\         <- Kritische User Flows (Playwright)
+         /\
+        /  \
+       /E2E \         <- Kritische User Flows (Playwright)
       /------\
-     /Integr.\      <- API Tests, Business Rules (80%)
+     /Integr. \       <- API Tests, Business Rules (80%)
     /----------\
-   / Unit Tests \   <- Domain Logic (70%)
+   / Unit Tests \     <- Domain Logic (70%)
   /--------------\
 ```
 
@@ -179,7 +253,7 @@ subcategories:
 
 ### 7. Qualitätsattribute & Szenarien
 
-**Status:** Offen, gehört in Arc42 Section 10
+**Status:** ⏳ To Do
 
 **Anforderungen:**
 - Konkrete Qualitätsszenarien definieren
@@ -225,7 +299,7 @@ subcategories:
 
 ### 8. CLI Frontend
 
-**Status:** V2, Nice-to-Have
+**Status:** 🚫 Won't Do (POC)
 
 **Anforderungen:**
 - Command-Line Interface als alternative Frontend
@@ -247,7 +321,7 @@ plc export --format csv --year 2024 --category receipts
 
 ### 9. Benachrichtigungssystem
 
-**Status:** V2
+**Status:** 🚫 Won't Do (POC)
 
 **Anforderungen:**
 - E-Mail Benachrichtigungen
@@ -263,6 +337,20 @@ plc export --format csv --year 2024 --category receipts
 - `OcrFailed`: "OCR fehlgeschlagen, manuelle Prüfung erforderlich"
 - `ManualReviewRequired`: "Klassifizierung unsicher, bitte prüfen"
 - `MonthlyReport`: "Deine Monatsübersicht ist verfügbar"
+
+### 10. Archiv-System für Retentation
+
+**Status:** 🚫 Won't Do (POC)
+
+**Anforderungen:**
+- Dokumente mit abgelaufener Retention in ein Archiv-System transferieren.
+
+### 11. Permanente Löschfunktion
+
+**Status:** 🚫 Won't Do (POC)
+
+**Anforderungen:**
+- Dokumente permanent erlauben zu löschen. Frage, wer darf
 
 ---
 
@@ -297,4 +385,5 @@ plc export --format csv --year 2024 --category receipts
 
 ## Update-Log
 
+- 2025-12-23: Status-Tracking für POC-Phase hinzugefügt
 - 2025-12-22: Initial Backlog erstellt basierend auf Product Owner Wünsche

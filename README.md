@@ -30,7 +30,7 @@ PaperlessCore ist eine Cloud-native Anwendung zur automatischen Verarbeitung, Kl
 - **Persistence**: Document-oriented Databases (DynamoDB, Firestore)
 - **Search**: Elasticsearch / MongoDB (CQRS Query-Side)
 - **Observability**: OpenTelemetry (OTEL)
-- **IaC**: Terraform
+- **IaC**: OpenTofu (Terraform alternative)
 - **OCR**: Cloud-native Services (Google Document AI / AWS Textract)
 
 ## Projekt-Prinzipien
@@ -49,13 +49,6 @@ PaperlessCore ist eine Cloud-native Anwendung zur automatischen Verarbeitung, Kl
 ├── docs/                           # Dokumentation
 │   ├── arc42/                      # Arc42 Architekturdokumentation
 │   └── adr/                        # Architecture Decision Records
-├── infrastructure/                 # Infrastructure as Code
-│   ├── gcp/                        # Google Cloud Platform
-│   │   ├── envs/default/          # Environment-spezifische Konfiguration
-│   │   └── modules/               # Wiederverwendbare Terraform Module
-│   └── aws/                        # Amazon Web Services
-│       ├── envs/default/
-│       └── modules/
 └── src/                            # Quellcode
     ├── backend/                    # C# Backend (Core Domain)
     │   ├── PLC.Domain/            # Domain Models, Entities, Value Objects
@@ -64,18 +57,45 @@ PaperlessCore ist eine Cloud-native Anwendung zur automatischen Verarbeitung, Kl
     │   ├── PLC.Persistence/       # Data Access, Repositories
     │   ├── PLC.Shared/            # Shared Code, Common Utilities
     │   └── PLC.Api/               # REST API (Controller, DTOs)
+    ├── infrastructure/             # Infrastructure as Code
+    │   ├── gcp/                    # Google Cloud Platform
+    │   │   ├── envs/dev/          # Environment-spezifische Konfiguration
+    │   │   └── modules/           # Wiederverwendbare OpenTofu Module
+    │   └── aws/                    # Amazon Web Services
+    │       ├── envs/dev/
+    │       └── modules/
     ├── services/                   # Microservices/Nano-Services
     │   ├── PLC.DocumentScanner/   # OCR und Document Processing
     │   ├── PLC.DocumentClassifier/ # KI-gestützte Klassifizierung
     │   └── PLC.DocumentSearch/    # Volltextsuche Service
     ├── functions/                  # Serverless Functions (Node.js)
-    └── frontend/
-        └── PLC.Web/               # Svelte Web Application
+    ├── frontend/                   # Svelte Web Application
+    └── config/                     # Konfigurationsdateien
+        └── document-structure.yaml
 ```
 
 ## Getting Started
 
-> Dokumentation folgt während der Entwicklung
+### Quick Start
+
+1. **Run Bootstrap Script**
+   ```bash
+   cd src/infrastructure/gcp/envs/dev
+   ./bootstrap.sh
+   ```
+
+2. **Follow Setup Guide**
+
+   See [Getting Started Guide](docs/getting-started.md) for detailed instructions.
+
+3. **Start Development**
+   ```bash
+   # Frontend
+   cd src/frontend && npm run dev
+
+   # Backend
+   cd src/backend/PLC.Api && dotnet run
+   ```
 
 ## Dokumentation
 
@@ -86,13 +106,14 @@ Wichtige Architekturentscheidungen werden als ADRs (Architecture Decision Record
 ## Entwicklung
 
 ### Voraussetzungen
-- Node.js LTS
+- Node.js LTS (v20+)
 - .NET 8 SDK
-- Terraform
-- Google Cloud SDK / AWS CLI
+- OpenTofu
+- Google Cloud SDK (gcloud CLI)
 
 ### Entwicklungsumgebung
-- Linux / WSL
+- Linux / WSL recommended
+- VS Code with extensions (C# Dev Kit, Svelte, HashiCorp Terraform)
 - Editor mit EditorConfig Support
 
 ## Lizenz
