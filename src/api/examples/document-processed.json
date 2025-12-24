@@ -1,0 +1,39 @@
+{
+  "id": "doc-550e8400-e29b-41d4-a716-446655440001",
+  "fileName": "rewe-2025-12-22.pdf",
+  "fileSize": 1234567,
+  "mimeType": "application/pdf",
+  "uploadedAt": "2025-12-23T10:30:00Z",
+  "uploadedBy": "user-123",
+  "status": "processed",
+  "processingStatus": {
+    "classification": "completed",
+    "ocr": "completed",
+    "extraction": "completed"
+  },
+  "classification": {
+    "category": "everyday-consumption",
+    "subcategory": "receipts",
+    "confidence": 0.95
+  },
+  "tags": ["2025", "12", "rewe"],
+  "assignedTo": ["Micha"],
+  "extractedData": {
+    "date": "2025-12-22",
+    "merchant": "REWE",
+    "totalAmount": 42.50,
+    "vatRates": [
+      {
+        "rate": 7,
+        "amount": 1.50
+      },
+      {
+        "rate": 19,
+        "amount": 5.00
+      }
+    ],
+    "paymentMethod": "card"
+  },
+  "storageUri": "gs://plc-documents/2025/12/doc-550e8400-e29b-41d4-a716-446655440001.pdf",
+  "slug": "2025-rewe-groceries-550e"
+}

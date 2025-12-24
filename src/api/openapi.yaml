@@ -1,0 +1,587 @@
+openapi: 3.0.3
+
+info:
+  title: PaperlessCore API
+  description: |
+    Intelligent Document Management API for Private Households
+
+    This API provides endpoints for uploading, managing, and searching household documents.
+    Documents are processed through an async pipeline (classification, OCR, extraction).
+  version: 1.0.0
+  contact:
+    name: PaperlessCore Team
+    url: https://github.com/medoni/paperless-core
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Local Mock Server (Prism)
+  - url: http://localhost:8080
+    description: Local Development (.NET API)
+  - url: https://api.dev.paperless-core.squirreldev.de
+    description: Development Environment
+  - url: https://api.prod.paperless-core.squirreldev.de
+    description: Production Environment
+
+tags:
+  - name: documents
+    description: Document upload, retrieval, and management
+  - name: health
+    description: Health and version endpoints
+
+paths:
+  /api/v1/health:
+    get:
+      tags: [health]
+      summary: Health check endpoint
+      description: Returns the health status of the API
+      operationId: getHealth
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/version:
+    get:
+      tags: [health]
+      summary: Version information
+      description: Returns version and build information
+      operationId: getVersion
+      responses:
+        '200':
+          description: Version information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionResponse'
+
+  /api/v1/documents:
+    post:
+      tags: [documents]
+      summary: Upload document(s)
+      description: |
+        Upload one or more documents for processing.
+
+        **Processing Pipeline:**
+        1. Upload (sync) - File validation and storage
+        2. Classification (async) - Document type detection
+        3. OCR (async, conditional) - Text extraction if enabled for category
+        4. Data Extraction (async, conditional) - Structured data extraction
+
+        Returns immediately with document IDs. Use GET /documents/{id} to check processing status.
+      operationId: uploadDocuments
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - files
+              properties:
+                files:
+                  type: array
+                  description: Document files to upload (PDF, JPG, JPEG, PNG)
+                  items:
+                    type: string
+                    format: binary
+                  maxItems: 100
+                metadata:
+                  type: object
+                  description: Optional metadata for uploaded documents
+                  properties:
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                      example: ["2025", "important"]
+                    assignedTo:
+                      type: array
+                      items:
+                        type: string
+                      example: ["Micha"]
+      responses:
+        '201':
+          description: Documents uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+              examples:
+                single:
+                  summary: Single document upload
+                  value:
+                    uploadId: "upload-550e8400-e29b-41d4-a716-446655440000"
+                    documents:
+                      - id: "doc-550e8400-e29b-41d4-a716-446655440001"
+                        fileName: "receipt.pdf"
+                        fileSize: 1234567
+                        mimeType: "application/pdf"
+                        status: "uploaded"
+                        uploadedAt: "2025-12-23T10:30:00Z"
+                multiple:
+                  summary: Multiple documents upload
+                  value:
+                    uploadId: "upload-550e8400-e29b-41d4-a716-446655440000"
+                    documents:
+                      - id: "doc-550e8400-e29b-41d4-a716-446655440001"
+                        fileName: "receipt1.pdf"
+                        fileSize: 1234567
+                        mimeType: "application/pdf"
+                        status: "uploaded"
+                        uploadedAt: "2025-12-23T10:30:00Z"
+                      - id: "doc-550e8400-e29b-41d4-a716-446655440002"
+                        fileName: "receipt2.pdf"
+                        fileSize: 2345678
+                        mimeType: "application/pdf"
+                        status: "uploaded"
+                        uploadedAt: "2025-12-23T10:30:01Z"
+        '400':
+          description: Invalid request (file size, format, or batch size exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "INVALID_FILE_FORMAT"
+                message: "File 'document.docx' has unsupported format. Allowed: PDF, JPG, JPEG, PNG"
+                details:
+                  fileName: "document.docx"
+                  allowedFormats: ["pdf", "jpg", "jpeg", "png"]
+        '413':
+          description: File size exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "FILE_TOO_LARGE"
+                message: "File size 52428800 bytes exceeds maximum of 50 MB"
+                details:
+                  maxFileSizeMB: 50
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/documents/{id}:
+    get:
+      tags: [documents]
+      summary: Get document by ID
+      description: |
+        Retrieve a document by its ID, including metadata, processing status, and extracted data.
+
+        **Processing Status:**
+        - `uploaded` - Initial upload completed
+        - `classifying` - Classification in progress
+        - `classified` - Classification completed
+        - `ocr-processing` - OCR in progress
+        - `ocr-completed` - OCR completed
+        - `extracting` - Data extraction in progress
+        - `processed` - Fully processed
+        - `failed` - Processing failed
+        - `manual-review` - Requires manual review
+      operationId: getDocumentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Document ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Document found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+              examples:
+                uploaded:
+                  summary: Document just uploaded
+                  value:
+                    id: "doc-550e8400-e29b-41d4-a716-446655440001"
+                    fileName: "receipt.pdf"
+                    fileSize: 1234567
+                    mimeType: "application/pdf"
+                    uploadedAt: "2025-12-23T10:30:00Z"
+                    uploadedBy: "user-123"
+                    status: "uploaded"
+                    processingStatus:
+                      classification: "pending"
+                      ocr: "pending"
+                      extraction: "pending"
+                    tags: ["2025", "12"]
+                    assignedTo: []
+                processed:
+                  summary: Fully processed receipt
+                  value:
+                    id: "doc-550e8400-e29b-41d4-a716-446655440001"
+                    fileName: "rewe-2025-12-22.pdf"
+                    fileSize: 1234567
+                    mimeType: "application/pdf"
+                    uploadedAt: "2025-12-23T10:30:00Z"
+                    uploadedBy: "user-123"
+                    status: "processed"
+                    processingStatus:
+                      classification: "completed"
+                      ocr: "completed"
+                      extraction: "completed"
+                    classification:
+                      category: "everyday-consumption"
+                      subcategory: "receipts"
+                      confidence: 0.95
+                    tags: ["2025", "12", "rewe"]
+                    assignedTo: ["Micha"]
+                    extractedData:
+                      date: "2025-12-22"
+                      merchant: "REWE"
+                      totalAmount: 42.50
+                      vatRates:
+                        - rate: 7
+                          amount: 1.50
+                        - rate: 19
+                          amount: 5.00
+                      paymentMethod: "card"
+                    storageUri: "gs://plc-documents/2025/12/doc-550e8400-e29b-41d4-a716-446655440001.pdf"
+                    slug: "2025-rewe-groceries-550e"
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "DOCUMENT_NOT_FOUND"
+                message: "Document with ID 'doc-invalid' not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [documents]
+      summary: Delete document
+      description: |
+        Soft-delete a document. The document will be marked as deleted but not permanently removed.
+        Requires admin role for permanent deletion.
+      operationId: deleteDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Document ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Document deleted successfully
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/documents/{id}/download:
+    get:
+      tags: [documents]
+      summary: Download document file
+      description: Download the original document file
+      operationId: downloadDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Document ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Document file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          example: healthy
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-12-23T10:30:00Z"
+        version:
+          type: string
+          example: "1.0.0"
+
+    VersionResponse:
+      type: object
+      required:
+        - version
+        - buildDate
+      properties:
+        version:
+          type: string
+          example: "1.0.0"
+        buildDate:
+          type: string
+          format: date-time
+          example: "2025-12-23T08:00:00Z"
+        gitCommit:
+          type: string
+          example: "abc123def456"
+        environment:
+          type: string
+          enum: [development, staging, production]
+          example: development
+
+    UploadResponse:
+      type: object
+      required:
+        - uploadId
+        - documents
+      properties:
+        uploadId:
+          type: string
+          format: uuid
+          description: Batch upload ID
+          example: "upload-550e8400-e29b-41d4-a716-446655440000"
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/UploadedDocument'
+
+    UploadedDocument:
+      type: object
+      required:
+        - id
+        - fileName
+        - fileSize
+        - mimeType
+        - status
+        - uploadedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Document ID
+          example: "doc-550e8400-e29b-41d4-a716-446655440001"
+        fileName:
+          type: string
+          example: "receipt.pdf"
+        fileSize:
+          type: integer
+          format: int64
+          description: File size in bytes
+          example: 1234567
+        mimeType:
+          type: string
+          example: "application/pdf"
+        status:
+          type: string
+          enum: [uploaded, classifying, classified, ocr-processing, ocr-completed, extracting, processed, failed, manual-review]
+          example: uploaded
+        uploadedAt:
+          type: string
+          format: date-time
+          example: "2025-12-23T10:30:00Z"
+
+    Document:
+      type: object
+      required:
+        - id
+        - fileName
+        - fileSize
+        - mimeType
+        - uploadedAt
+        - uploadedBy
+        - status
+        - processingStatus
+        - tags
+        - assignedTo
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Document ID
+          example: "doc-550e8400-e29b-41d4-a716-446655440001"
+        fileName:
+          type: string
+          example: "receipt.pdf"
+        fileSize:
+          type: integer
+          format: int64
+          description: File size in bytes
+          example: 1234567
+        mimeType:
+          type: string
+          example: "application/pdf"
+        uploadedAt:
+          type: string
+          format: date-time
+          example: "2025-12-23T10:30:00Z"
+        uploadedBy:
+          type: string
+          description: User ID who uploaded the document
+          example: "user-123"
+        status:
+          type: string
+          enum: [uploaded, classifying, classified, ocr-processing, ocr-completed, extracting, processed, failed, manual-review]
+          example: processed
+        processingStatus:
+          $ref: '#/components/schemas/ProcessingStatus'
+        classification:
+          $ref: '#/components/schemas/Classification'
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["2025", "12", "rewe"]
+        assignedTo:
+          type: array
+          items:
+            type: string
+          description: Person names this document is assigned to
+          example: ["Micha"]
+        extractedData:
+          type: object
+          description: Extracted structured data (varies by document type)
+          additionalProperties: true
+          example:
+            date: "2025-12-22"
+            merchant: "REWE"
+            totalAmount: 42.50
+        storageUri:
+          type: string
+          description: Internal storage URI (GCS/S3)
+          example: "gs://plc-documents/2025/12/doc-550e8400-e29b-41d4-a716-446655440001.pdf"
+        slug:
+          type: string
+          description: Human-readable URL slug
+          example: "2025-rewe-groceries-550e"
+        ocrText:
+          type: string
+          description: Full OCR text (only if OCR was performed)
+          example: "REWE\nKassenbon\n..."
+
+    ProcessingStatus:
+      type: object
+      required:
+        - classification
+        - ocr
+        - extraction
+      properties:
+        classification:
+          type: string
+          enum: [pending, processing, completed, failed, skipped]
+          example: completed
+        ocr:
+          type: string
+          enum: [pending, processing, completed, failed, skipped]
+          example: completed
+        extraction:
+          type: string
+          enum: [pending, processing, completed, failed, skipped]
+          example: completed
+
+    Classification:
+      type: object
+      required:
+        - category
+        - subcategory
+        - confidence
+      properties:
+        category:
+          type: string
+          description: Top-level category ID (from document-structure.yaml)
+          example: "everyday-consumption"
+        subcategory:
+          type: string
+          description: Subcategory ID (from document-structure.yaml)
+          example: "receipts"
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Classification confidence score
+          example: 0.95
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "INVALID_FILE_FORMAT"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "File has unsupported format"
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication (V2)
+
+# Security will be added in V2
+# security:
+#   - bearerAuth: []

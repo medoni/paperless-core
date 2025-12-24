@@ -1,0 +1,16 @@
+{
+  "id": "doc-550e8400-e29b-41d4-a716-446655440001",
+  "fileName": "receipt.pdf",
+  "fileSize": 1234567,
+  "mimeType": "application/pdf",
+  "uploadedAt": "2025-12-23T10:30:00Z",
+  "uploadedBy": "user-123",
+  "status": "uploaded",
+  "processingStatus": {
+    "classification": "pending",
+    "ocr": "pending",
+    "extraction": "pending"
+  },
+  "tags": ["2025", "12"],
+  "assignedTo": []
+}

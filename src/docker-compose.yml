@@ -1,0 +1,95 @@
+name: plc
+services:
+  # Mock API Server (Prism)
+  # Generates responses from OpenAPI spec
+  mock-api:
+    image: stoplight/prism:latest
+    container_name: plc-mock-api
+    command: mock -h 0.0.0.0 /api/openapi.yaml --dynamic
+    ports:
+      - "3000:4010"
+    volumes:
+      - ./api:/api:ro
+    environment:
+      - LOG_LEVEL=info
+    networks:
+      - plc-network
+
+  # Frontend (Svelte + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: plc-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Prevent overwriting node_modules with host's empty folder
+    environment:
+      - VITE_API_URL=http://localhost:3000
+      - NODE_ENV=development
+    networks:
+      - plc-network
+    depends_on:
+      - mock-api
+    stdin_open: true
+    tty: true
+
+  # .NET Backend API (optional, when ready)
+  # api:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: PLC.Api/Dockerfile.dev
+  #   container_name: plc-api
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./backend:/app:delegated
+  #     - ./config:/config:ro
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_URLS=http://+:8080
+  #   networks:
+  #     - plc-network
+  #   depends_on:
+  #     - postgres
+
+  # PostgreSQL (for real API)
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: plc-postgres
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=plc
+  #     - POSTGRES_PASSWORD=plc_dev_password
+  #     - POSTGRES_DB=paperlesscore
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - plc-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U plc"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Firestore Emulator (alternative to PostgreSQL)
+  # firestore-emulator:
+  #   image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+  #   container_name: plc-firestore-emulator
+  #   command: gcloud emulators firestore start --host-port=0.0.0.0:8081
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     - FIRESTORE_PROJECT_ID=paperlesscore-local
+  #   networks:
+  #     - plc-network
+
+networks:
+  plc-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data:

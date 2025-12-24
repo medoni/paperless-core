@@ -1,21 +1,35 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import DocumentUpload from './lib/components/DocumentUpload.svelte';
+  import DocumentDetail from './lib/components/DocumentDetail.svelte';
+  import { api, type UploadResponse } from './lib/api';
 
   let apiStatus = 'checking...';
-  let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  let currentView: 'upload' | 'detail' = 'upload';
+  let selectedDocumentId: string | null = null;
+  let uploadedDocuments: UploadResponse | null = null;
 
   async function checkApiHealth() {
     try {
-      const response = await fetch(`${apiUrl}/health`);
-      if (response.ok) {
-        const data = await response.json();
-        apiStatus = `connected (${data.status})`;
-      } else {
-        apiStatus = 'unavailable';
-      }
+      const data = await api.getHealth();
+      apiStatus = `connected (${data.status})`;
     } catch (error) {
       apiStatus = 'disconnected';
     }
+  }
+
+  function handleUploaded(event: CustomEvent<UploadResponse>) {
+    uploadedDocuments = event.detail;
+    if (event.detail.documents.length > 0) {
+      // Automatically show first uploaded document
+      selectedDocumentId = event.detail.documents[0].id;
+      currentView = 'detail';
+    }
+  }
+
+  function showUpload() {
+    currentView = 'upload';
+    selectedDocumentId = null;
   }
 
   onMount(() => {
@@ -25,37 +39,70 @@
 
 <main>
   <div class="container">
-    <h1>Hello Universe 🌌</h1>
-    <p class="subtitle">PaperlessCore Development Environment</p>
+    <header>
+      <h1>PaperlessCore 📄</h1>
+      <p class="subtitle">Document Management System</p>
+    </header>
 
-    <div class="status">
-      <h2>System Status</h2>
-      <div class="status-item">
-        <span class="label">Frontend:</span>
-        <span class="value success">Running</span>
-      </div>
-      <div class="status-item">
-        <span class="label">API:</span>
-        <span class="value" class:success={apiStatus.includes('connected')} class:error={apiStatus.includes('disconnected')}>
-          {apiStatus}
-        </span>
-      </div>
+    <div class="status-bar">
+      <span class="status-label">API Status:</span>
+      <span
+        class="status-value"
+        class:success={apiStatus.includes('connected')}
+        class:error={apiStatus.includes('disconnected')}
+      >
+        {apiStatus}
+      </span>
     </div>
 
-    <div class="info">
-      <h2>Environment</h2>
-      <dl>
-        <dt>Version</dt>
-        <dd>0.1.0-dev</dd>
-        <dt>API Endpoint</dt>
-        <dd>{apiUrl}</dd>
-        <dt>Build Time</dt>
-        <dd>{new Date().toISOString()}</dd>
-      </dl>
-    </div>
+    <nav class="tabs">
+      <button
+        class="tab"
+        class:active={currentView === 'upload'}
+        on:click={showUpload}
+      >
+        📤 Upload
+      </button>
+      <button
+        class="tab"
+        class:active={currentView === 'detail'}
+        disabled={!selectedDocumentId}
+        on:click={() => currentView = 'detail'}
+      >
+        📋 Document Details
+      </button>
+    </nav>
 
-    <div class="actions">
-      <button on:click={checkApiHealth}>Refresh Status</button>
+    <div class="content">
+      {#if currentView === 'upload'}
+        <DocumentUpload on:uploaded={handleUploaded} />
+
+        {#if uploadedDocuments}
+          <div class="upload-success">
+            <h3>✅ Upload Successful!</h3>
+            <p>
+              {uploadedDocuments.documents.length} document{uploadedDocuments.documents.length !== 1 ? 's' : ''} uploaded successfully
+            </p>
+            <ul class="uploaded-list">
+              {#each uploadedDocuments.documents as doc}
+                <li>
+                  <button
+                    class="doc-link"
+                    on:click={() => {
+                      selectedDocumentId = doc.id;
+                      currentView = 'detail';
+                    }}
+                  >
+                    {doc.fileName}
+                  </button>
+                </li>
+              {/each}
+            </ul>
+          </div>
+        {/if}
+      {:else if currentView === 'detail' && selectedDocumentId}
+        <DocumentDetail documentId={selectedDocumentId} />
+      {/if}
     </div>
   </div>
 </main>
@@ -72,65 +119,51 @@
   }
 
   main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
     padding: 2rem;
   }
 
   .container {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    max-width: 600px;
-    width: 100%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2rem;
   }
 
   h1 {
     margin: 0 0 0.5rem 0;
-    font-size: 2.5rem;
-    color: #667eea;
+    font-size: 3rem;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .subtitle {
-    margin: 0 0 2rem 0;
-    color: #666;
-    font-size: 1.1rem;
-  }
-
-  .status, .info {
-    margin: 2rem 0;
-    padding: 1.5rem;
-    background: #f7f7f7;
-    border-radius: 0.5rem;
-  }
-
-  h2 {
-    margin: 0 0 1rem 0;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
     font-size: 1.2rem;
-    color: #333;
   }
 
-  .status-item {
+  .status-bar {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
     display: flex;
-    justify-content: space-between;
-    margin: 0.5rem 0;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #e0e0e0;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
-  .status-item:last-child {
-    border-bottom: none;
-  }
-
-  .label {
+  .status-label {
     font-weight: 600;
     color: #555;
   }
 
-  .value {
+  .status-value {
     color: #666;
   }
 
@@ -144,48 +177,87 @@
     font-weight: 600;
   }
 
-  dl {
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    padding: 1rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #666;
+  }
+
+  .tab:hover:not(:disabled) {
+    background: white;
+  }
+
+  .tab.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .tab:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .content {
+    background: white;
+    border-radius: 0 0 0.5rem 0.5rem;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+
+  .upload-success {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: #f0fdf4;
+    border: 2px solid #86efac;
+    border-radius: 0.5rem;
+  }
+
+  .upload-success h3 {
+    margin: 0 0 0.5rem 0;
+    color: #166534;
+  }
+
+  .upload-success p {
+    margin: 0 0 1rem 0;
+    color: #166534;
+  }
+
+  .uploaded-list {
+    list-style: none;
+    padding: 0;
     margin: 0;
   }
 
-  dt {
-    font-weight: 600;
-    color: #555;
-    margin-top: 0.75rem;
+  .uploaded-list li {
+    padding: 0.5rem 0;
   }
 
-  dt:first-child {
-    margin-top: 0;
-  }
-
-  dd {
-    margin: 0.25rem 0 0 0;
-    color: #666;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
-  }
-
-  .actions {
-    margin-top: 2rem;
-    text-align: center;
-  }
-
-  button {
-    background: #667eea;
-    color: white;
+  .doc-link {
+    background: none;
     border: none;
-    padding: 0.75rem 2rem;
-    border-radius: 0.5rem;
-    font-size: 1rem;
+    color: #667eea;
+    text-decoration: underline;
     cursor: pointer;
-    transition: background 0.2s;
+    font-size: 0.95rem;
+    padding: 0;
   }
 
-  button:hover {
-    background: #5568d3;
-  }
-
-  button:active {
-    transform: scale(0.98);
+  .doc-link:hover {
+    color: #5568d3;
   }
 </style>

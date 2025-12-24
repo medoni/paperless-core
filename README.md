@@ -76,7 +76,14 @@ PaperlessCore ist eine Cloud-native Anwendung zur automatischen Verarbeitung, Kl
 
 ## Getting Started
 
-### Quick Start
+### Quick Start (Local Development)
+
+**Start everything with Docker Compose:**
+```bash
+docker compose up
+```
+
+### Cloud Deployment
 
 1. **Run Bootstrap Script**
    ```bash
@@ -85,17 +92,7 @@ PaperlessCore ist eine Cloud-native Anwendung zur automatischen Verarbeitung, Kl
    ```
 
 2. **Follow Setup Guide**
-
    See [Getting Started Guide](docs/getting-started.md) for detailed instructions.
-
-3. **Start Development**
-   ```bash
-   # Frontend
-   cd src/frontend && npm run dev
-
-   # Backend
-   cd src/backend/PLC.Api && dotnet run
-   ```
 
 ## Dokumentation
 
