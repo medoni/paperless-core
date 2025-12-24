@@ -40,6 +40,12 @@ variable "dockerfile_path" {
   default     = null
 }
 
+variable "cloudbuild_config_path" {
+  description = "Path to cloudbuild.yaml (optional, defaults to source_path/cloudbuild.yaml)"
+  type        = string
+  default     = null
+}
+
 variable "build_args" {
   description = "Build arguments to pass to Docker build"
   type        = map(string)

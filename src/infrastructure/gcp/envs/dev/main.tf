@@ -19,14 +19,15 @@ module "document_storage" {
 module "plc_api_build" {
   source = "../../modules/container-build"
 
-  project_id           = var.project_id
-  region               = var.region
-  environment          = var.environment
-  repository_name      = "plc-api-repo"
-  image_name           = "plc-api"
-  image_tag            = "latest"
-  source_path          = "${path.module}/../../../../backend/PLC.Api"
-  create_artifact_repo = true
+  project_id              = var.project_id
+  region                  = var.region
+  environment             = var.environment
+  repository_name         = "plc-api-repo"
+  image_name              = "plc-api"
+  image_tag               = "latest"
+  source_path             = "${path.module}/../../../../backend"
+  cloudbuild_config_path  = "${path.module}/../../../../backend/cloudbuild-api.yaml"
+  create_artifact_repo    = true
 
   image_uri = "${var.region}-docker.pkg.dev/${var.project_id}/plc-api-repo/plc-api:latest"
 }

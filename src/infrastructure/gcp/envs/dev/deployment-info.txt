@@ -1,6 +1,6 @@
 PaperlessCore - Deployment Info
 Environment: dev
-Generated: 2025-12-23T06:33:29Z
+Generated: 2025-12-24T15:59:39Z
 
 ================================================================================
 DEPLOYED SERVICES

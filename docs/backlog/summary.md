@@ -32,6 +32,8 @@
 | 14 | [Feinere Zugriffsrechte](entries/v2/14-feinere-zugriffsrechte.md) | ⏳ To Do | V2 | Niedrig |
 | 15 | [Backup/Restore-Konzept](entries/v2/15-backup-restore-konzept.md) | ⏳ To Do | V2 | Niedrig |
 | 16 | [Cloud Build Multi-Cloud Refactoring](entries/tech-debt/16-cloud-build-multi-cloud-refactoring.md) | ⏳ To Do | Tech Debt | Mittel |
+| 17 | [Structured Logging](entries/v1/17-structured-logging.md) | ⏳ To Do | V1 | Hoch |
+| 18 | [OpenTelemetry (OTEL) Integration](entries/v1/18-otel-integration.md) | ⏳ To Do | V1 | Hoch |
 
 ---
 
@@ -39,14 +41,14 @@
 
 ### Nach Meilenstein
 
-- **V1**: 9 Einträge (2 erledigt, 3 offen, 4 verschoben)
+- **V1**: 11 Einträge (2 erledigt, 5 offen, 4 verschoben)
 - **V2**: 6 Einträge (0 erledigt, 2 offen, 4 verschoben)
 - **Tech Debt**: 1 Eintrag (0 erledigt, 1 offen)
 
 ### Nach Status
 
 - ✅ **Done**: 2 Einträge
-- ⏳ **To Do**: 6 Einträge
+- ⏳ **To Do**: 8 Einträge
 - 🚫 **Won't Do (POC)**: 8 Einträge
 
 ---
@@ -58,11 +60,14 @@
 - ADR-006: Testing Strategy & Test Pyramid (→ Eintrag 08)
 - ADR-007: CI/CD Pipeline & Deployment Strategy (→ Eintrag 07)
 - ADR-008: Notification System Design (→ Eintrag 11)
+- ADR-009: Structured Logging Strategy (→ Eintrag 17)
+- ADR-010: Observability & Tracing Strategy (→ Eintrag 18)
 
 ---
 
 ## Update-Log
 
+- 2025-12-24: Neue Einträge 17 (Structured Logging) und 18 (OTEL Integration) hinzugefügt
 - 2025-12-24: Backlog in separate Dateien strukturiert (v1/, v2/, tech-debt/)
 - 2025-12-23: Status-Tracking für POC-Phase hinzugefügt
 - 2025-12-22: Initial Backlog erstellt basierend auf Product Owner Wünsche

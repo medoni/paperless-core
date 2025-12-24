@@ -27,7 +27,7 @@ resource "null_resource" "build_and_push" {
       gcloud builds submit ${var.source_path} \
         --project=${var.project_id} \
         --region=${var.region} \
-        --config=${var.source_path}/cloudbuild.yaml \
+        --config=${var.cloudbuild_config_path != null ? var.cloudbuild_config_path : "${var.source_path}/cloudbuild.yaml"} \
         --substitutions=_IMAGE_URI=${var.image_uri}${length(var.build_args) > 0 ? ",${join(",", [for k, v in var.build_args : "_${k}=${v}"])}" : ""}
     EOT
   }

@@ -5,7 +5,7 @@ steps:
       - '-t'
       - '${_IMAGE_URI}'
       - '-f'
-      - 'Dockerfile'
+      - 'PLC.Api/Dockerfile'
       - '.'
     dir: '.'
 
